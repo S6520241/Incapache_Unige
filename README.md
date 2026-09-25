@@ -43,44 +43,47 @@ Tutti gli avvisi di copyright originali appartenenti a Giovanni Chiola e Giovann
 
 _____________________________________________________________
 
-# ProgettoSETI_Unige
+# Incapache_Unige
 
-# Ping Pong Project - TCP and UDP Performance Analysis
+# incApache Project (Is Not Comparable to APACHE)
 
-This project consists of a suite of client-server tools developed in C to evaluate and measure network performance, calculating Round Trip Time (RTT), latency, and bandwidth over TCP and UDP protocols.
+This repository contains `incApache`, a concurrent web server developed in C to handle HTTP requests. The project was originally created to support the Information Processing and Transmission Systems (SETI) laboratory at the University of Genoa.
 
 ## Authors and Acknowledgments
 
-**Important note:** The project skeleton, the entire software architecture, and the vast majority of the base source code were designed and written by professors **Giovanni Chiola** and **Giovanni Lagorio**. 
+**Important note:** The software architecture and almost all of the base source code were designed and written by professors **Giovanni Chiola** and **Giovanni Lagorio**.
 
-My work within this repository was strictly limited to "filling in" the missing code blocks, completing the program parts necessary for the application to function.
+My work within this repository was limited to completing the implementation (replacing the educational blocks `/*** TO BE DONE ***/`) to make the server operational, capable of handling concurrency, network responses, and HTTP protocol logic.
+
+## Server Features
+
+* **HTTP/1.0 and HTTP/1.1 Support:** The server can handle single requests per connection (HTTP/1.0) or multiple successive requests on the same connection in "pipeline" mode (HTTP/1.1), utilizing multiple threads to speed up client interaction.
+* **Security via chroot:** To limit accessible files strictly to the contents of the `www-root` directory, the server uses the `chroot()` system call. For this reason, the executable requires administrative privileges (via `sudo` and the `setuid` flag in the `Makefile`).
+* **Mime-Type Resolution:** The server launches a child process in the background that uses the system `file` command (e.g., `file -i filename`) to determine the `mime-type` in real-time to be included in the HTTP header.
+* **Cookie Management:** It uses HTTP Cookies to assign an identifier to each new user and track the number of requests coming from the same client.
 
 ## Modifications to Original Files
 
-As required by the license terms for derivative works, it is declared that the original source files have been altered. Specifically, I removed the educational markers (`/*** TO BE DONE ***/`) and implemented the operational logic in the following files:
-* `tcp_ping.c` and `udp_ping.c`: implementation of the client logic.
-* `pong_server.c`: server-side request handling.
-* `readwrite.c`: functions for secure datagram sending and receiving.
-* `statistics.c`: algorithms for statistical RTT calculation.
+In compliance with the license terms, I declare that I have modified the following source files to implement the missing logic:
+* **`incApache_http.c`**: Implementation of request parsing (extracting method, file, protocol, and headers like `If-Modified-Since`), GMT date calculation and formatting, cookie setting, and efficient file transfer to the client via `sendfile()`.
+* **`incApache_main.c`**: Configuration of the listening socket (`getaddrinfo`, `socket`, `bind`), de-escalation of root privileges before starting the webserver, and creation of the initial thread pool.
+* **`incApache_threads.c`**: Secure management of race conditions (through the use of mutexes) for mime-type querying, and implementation of the queuing and synchronization logic for response threads (`pthread_join`).
+* **`incApache_aux.c`**: Modification of the `my_timegm` function for safe timestamp conversion via temporary manipulation of the `TZ` environment variable.
 
-## Repository Structure
+## Compilation and Execution
 
-To keep the project clean, the repository exclusively tracks files useful for development and analysis:
-* **Source code:** `.c` and `.h` files.
-* **Automation:** Bash scripts and the provided `Makefile` for compilation.
-* **Visual results:** The graphs generated from the measurements.
-* **Licenses and documentation:** This `README`, the `COPYING` file, and the final report.
+To compile the project, run the `make` command inside the repository root[cite: 14]. The Makefile will generate the binary in the `bin/` folder and, via `sudo`, will set the `setuid` flag and change ownership to `root` to allow the use of `chroot()`.
 
-Through a specific `.gitignore` file, the following have been intentionally excluded:
-* All precompiled binaries, executable files (`pong_server`, `tcp_ping`, `udp_ping`), and libraries (`libpingpong.a`) originally contained in `bin/`.
-* All raw data extracted from tests, including the heavy text output files (`.out`, `.out.broken`, `.dat`) accumulated in `data/`.
+```bash
+make all
+```
+To launch the server, you must specify the root directory for the web files and, optionally, the TCP port (default 8000)
 
-## Test Results
-
-The complete network measurement results, including a detailed analysis of bottlenecks caused by bandwidth and latency, are documented in the **`RELAZIONE.md`** file located in the main directory. 
+```bash
+bin/incapache www-root 8000
+```
 
 ## License
+This project is distributed under the GNU General Public License (GPL) v2.
 
-This project is released under the **GNU General Public License (GPL) v2**, in accordance with the original license.
-
-All original copyright notices belonging to Giovanni Chiola and Giovanni Lagorio are kept intact at the beginning of each source file. The modifications made in this repository are redistributed under the same GPLv2 license free of charge for all third parties. For more details, please consult the `COPYING` document included in the repository.
+All original copyright notices belonging to Giovanni Chiola and Giovanni Lagorio are kept intact. It is permitted to copy, distribute, and modify the source code while respecting the same conditions provided by the license[cite: 14]. For full terms, refer to the COPYING file included in the repository
