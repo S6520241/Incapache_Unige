@@ -36,3 +36,7 @@ Per lanciare il server, è necessario specificare la directory radice per i file
 ```bash
 bin/incapache www-root 8000
 ```
+## Licenza
+Questo progetto è distribuito sotto la licenza GNU General Public License (GPL) v2[cite: 12].
+
+Tutti gli avvisi di copyright originali appartenenti a Giovanni Chiola e Giovanni Lagorio sono mantenuti intatti[cite: 12]. È permesso copiare, distribuire e modificare il codice sorgente rispettando le medesime condizioni previste dalla licenza. Per i termini completi, fare riferimento al file COPYING incluso nel repository
